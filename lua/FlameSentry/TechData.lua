@@ -1,6 +1,6 @@
 
-local old = BuildTechData
-local function BuildTechData()
+local old = assert(BuildTechData)
+function BuildTechData()
 	local data = old()
 	table.insert(data, {
 		[kTechDataId]                       = kTechId.FlameSentry,
@@ -32,4 +32,5 @@ local function BuildTechData()
 		[kTechDataGhostGuidesMethod]        = GetBatteryInRange,
 		[kTechDataObstacleRadius]           = 0.25,
 	})
+	return data
 end

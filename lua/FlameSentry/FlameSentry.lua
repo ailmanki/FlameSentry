@@ -7,11 +7,17 @@ FlameSentry.kMapName        = "flamesentry"
 FlameSentry.kModelName      = PrecacheAsset("models/marine/flame_sentry/flame_sentry.model")
 FlameSentry.kAnimationGraph = PrecacheAsset("models/marine/flame_sentry/flame_sentry.animation_graph")
 
+-- Properties to inherit from Flamethrower
 for _, v in ipairs {
 	"kConeWidth",
 	"kDamageRadius",
+	"GetRange",
+	"BurnSporesAndUmbra",
+	"CreateFlame",
+	"ApplyConeDamage",
+	"ShootFlame",
 } do
-	FlameSentry[v] = Flamethrower[v]
+	FlameSentry[v] = assert(Flamethrower[v])
 end
 
 FlameSentry.kMuzzleNode = "fxnode_flamesentrymuzzle"
@@ -52,6 +58,22 @@ function FlameSentry:OnInitialized()
 		self.GetAttachPointOrigin = GetAttachPointOrigin
 	end
 
+	if Server then
+		local attacker = self
+		local maxPitchDegree =  self.kMaxPitch
+		local minPitchDegree = -self.kMaxPitch
+		self.targetSelector.filters[1] = function(target, targetPoint) -- modification of PitchTargetFilter
+			local origin     = attacker:GetEyePos()
+			local viewCoords = attacker:GetCoords()
+			local v          = targetPoint - origin
+			local distY      = Math.DotProduct(viewCoords.yAxis, v)
+			local distZ      = Math.DotProduct(viewCoords.zAxis, v)
+			local pitch      = 180 * math.atan2(distY,distZ) / math.pi
+			local result     = pitch >= minPitchDegree and pitch <= maxPitchDegree
+			return result
+		end
+	end
+
 	--[[ Uncomment to enable damage buff
 	if not self.flamesentry_DoDamage then
 		self.flamesentry_DoDamage = self.DoDamage
@@ -65,7 +87,7 @@ function FlameSentry:OnGetMapBlipInfo()
 end
 
 function FlameSentry:GetEyePos()
-	return self:GetAttachPointOrigin(FlameSentry.kMuzzleNode)
+	return assert(self:GetAttachPointOrigin(FlameSentry.kMuzzleNode))
 end
 
 function FlameSentry:OverrideLaserLength()
@@ -73,9 +95,13 @@ function FlameSentry:OverrideLaserLength()
 end
 
 function FlameSentry:GetViewAngles()
-	local angles = Angles()
-	angles:BuildFromCoords(Coords.GetLookIn(Vector(), self.targetDirection))
-	return angles
+	if self.attacking then
+		local angles = Angles()
+		angles:BuildFromCoords(Coords.GetLookIn(Vector(), self.targetDirection))
+		return angles
+	else
+		return self:GetAngles()
+	end
 end
 
 function FlameSentry:GetMeleeOffset()
@@ -96,7 +122,7 @@ if Server then
 			self:TriggerEffects "flamethrower_attack"
 			self.last_attack_effect = Shared.GetTime()
 		end
-		return Flamethrower.ShootFlame(self, self)
+		return self:ShootFlame(self)
 	end
 end
 
