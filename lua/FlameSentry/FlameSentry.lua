@@ -131,13 +131,15 @@ if Server then
 	end
 end
 
-GetEffectManager:AddEffectData(nil, {
+GetEffectManager():AddEffectData(nil, {
 	flamesentry_attack = {{{
 		parented_cinematic = (function()
 			for _, v in ipairs(kMarineWeaponEffects.flamethrower_attack.flamethrowerAttackCinematics) do
-				if v.weapon_cinematic and not v.empty then
-					Log("Found weapon cinematic %s", v.weapon_cinematic)
-					return v.weapon_cinematic
+				if v.assetType == "weapon_cinematic" and not v.empty then
+					Log("Found weapon cinematic %s", v.asset)
+					return v.asset
+				else
+					--Log("%s is not valid", v)
 				end
 			end
 			error "Could not find the flamethrower_attack weapon_cinematic for flamesentry_attack!"
