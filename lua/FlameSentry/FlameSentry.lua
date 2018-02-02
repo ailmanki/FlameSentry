@@ -23,9 +23,9 @@ end
 local kMuzzleNode         = "fxnode_flamesentrymuzzle"
 local kMuzzleNodeOriginal = Sentry.kMuzzleNode
 FlameSentry.kMuzzleNode   = kMuzzleNode
--- Unused?
---FlameSentry.kEyeNode	  = "fxnode_eye2"
---FlameSentry.kLaserNode  = "fxnode_eye2"
+-- Unused
+FlameSentry.kEyeNode	  = "fxnode_eye2"
+FlameSentry.kLaserNode  = "fxnode_eye2"
 
 local networkVars = {}
 
