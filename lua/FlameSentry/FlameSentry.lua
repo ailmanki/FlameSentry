@@ -74,6 +74,7 @@ function FlameSentry:OnInitialized()
 			local result     = pitch >= minPitchDegree and pitch <= maxPitchDegree
 			return result
 		end
+		self.targetSelector.range = self:GetRange()
 	elseif Client then
 		self:InitTrailCinematic(kFlamethrowerEffectType.ThirdPerson)
         self.trailCinematic:AttachTo(self, TRAIL_ALIGN_X, Vector(0.3, 0, 0), kMuzzleNode)
@@ -101,7 +102,7 @@ function FlameSentry:GetEyePos()
 end
 
 function FlameSentry:OverrideLaserLength()
-	return kFlamethrowerRange
+	return self:GetRange()
 end
 
 function FlameSentry:GetViewAngles()
