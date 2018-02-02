@@ -20,7 +20,9 @@ for _, v in ipairs {
 	FlameSentry[v] = assert(Flamethrower[v])
 end
 
-FlameSentry.kMuzzleNode = "fxnode_flamesentrymuzzle"
+local kMuzzleNode         = "fxnode_flamesentrymuzzle"
+local kMuzzleNodeOriginal = Sentry.kMuzzleNode
+FlameSentry.kMuzzleNode   = kMuzzleNode
 -- Unused?
 --FlameSentry.kEyeNode	  = "fxnode_eye2"
 --FlameSentry.kLaserNode  = "fxnode_eye2"
@@ -37,8 +39,8 @@ if Server then
 end
 
 local function GetAttachPointOrigin(self, node)
-	if node == "fxnode_sentrymuzzle" or node == "fxnode_flamethrowermuzzle" then
-		return self:flamesentry_GetAttachPointOrigin(self.kMuzzleNode)
+	if node == kMuzzleNodeOriginal or node == "fxnode_flamethrowermuzzle" then
+		return self:flamesentry_GetAttachPointOrigin(kMuzzleNode)
 	else
 		return self:flamesentry_GetAttachPointOrigin(node)
 	end
@@ -115,15 +117,33 @@ if Server then
 	end
 
 	function FlameSentry:FireBullets()
-		if not self.last_attack_effect or Shared.GetTime() - self.last_attack_effect < 2 then
+		---[[
+		if not self.last_attack_effect or Shared.GetTime() - self.last_attack_effect > 1 then
 			self:TriggerEffects "flamethrower_attack_start"
 			self.last_attack_effect = Shared.GetTime()
-		elseif Shared.GetTime() - self.last_attack_effect < 0.5 then
-			self:TriggerEffects "flamethrower_attack"
+		elseif Shared.GetTime() - self.last_attack_effect > 0.5 then
+			self:TriggerEffects "flamesentry_attack"
 			self.last_attack_effect = Shared.GetTime()
 		end
+		--]]
+		--self:TriggerEffects "flamethrower_attack_start"
 		return self:ShootFlame(self)
 	end
 end
+
+GetEffectManager:AddEffectData(nil, {
+	flamesentry_attack = {{{
+		parented_cinematic = (function()
+			for _, v in ipairs(kMarineWeaponEffects.flamethrower_attack.flamethrowerAttackCinematics) do
+				if v.weapon_cinematic and not v.empty then
+					Log("Found weapon cinematic %s", v.weapon_cinematic)
+					return v.weapon_cinematic
+				end
+			end
+			error "Could not find the flamethrower_attack weapon_cinematic for flamesentry_attack!"
+		end)(),
+		attach_point = kMuzzleNode,
+	}}}
+})
 
 Shared.LinkClassToMap("FlameSentry", FlameSentry.kMapName, networkVars)

@@ -1,22 +1,5 @@
 Script.Load "lua/FlameSentry/FlameSentry.lua"
 
-table.insert(kGeneralEffectData.spawn.spawnEffects, 1, {
-	cinematic = "cinematics/marine/structures/spawn_building.cinematic",
-	classname = "FlameSentry"})
-table.insert(kGeneralEffectData.spawn.spawnSoundEffects, 1, {
-	sound = "sound/NS2.fev/marine/structures/generic_spawn",
-	classname = "FlameSentry", done = true})
-table.insert(kGeneralEffectData.deploy.deploySoundEffects, 1, {
-	sound = "sound/NS2.fev/marine/structures/sentry_deploy",
-	classname = "FlameSentry", done = true})
-table.insert(kDamageEffects.damaged.damagedEffects, 1, {
-	cinematic = "cinematics/marine/sentry/hurt_severe.cinematic",
-	classname = "FlameSentry", flinch_severe = true, done = true})
-table.insert(kDamageEffects.damaged.damagedEffects, 1, {
-	cinematic = "cinematics/marine/sentry/hurt.cinematic",
-	classname = "FlameSentry", flinch_severe = false, done = true})
-
-
 -------------------------------------- Little bonus:
 -------------------------------------- Trigger the hidden taunt animation on the "ta_taunt" console command
 
