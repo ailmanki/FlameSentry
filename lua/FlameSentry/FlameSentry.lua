@@ -20,14 +20,19 @@ for _, v in ipairs {
 	FlameSentry[v] = assert(Flamethrower[v])
 end
 
+local kFlamethrowerEffectType
+if Client then
+	FlameSentry.InitTrailCinematic = assert(Flamethrower.InitTrailCinematic)
+
+	kFlamethrowerEffectType = debug.getupvalue(FlameSentry.InitTrailCinematic, "kEffectType")
+end
+
 local kMuzzleNode         = "fxnode_flamesentrymuzzle"
 local kMuzzleNodeOriginal = Sentry.kMuzzleNode
 FlameSentry.kMuzzleNode   = kMuzzleNode
 -- Unused
 FlameSentry.kEyeNode	  = "fxnode_eye2"
 FlameSentry.kLaserNode  = "fxnode_eye2"
-
-local networkVars = {}
 
 if Server then
 	local kFireLoopingSound = PrecacheAsset("sound/NS2.fev/marine/flamethrower/attack_loop")
@@ -55,11 +60,6 @@ function FlameSentry:OnInitialized()
 
 	self:SetModel(self.kModelName, self.kAnimationGraph) -- How constants should **really** be used
 
-	if not self.flamesentry_GetAttachPointOrigin then
-		self.flamesentry_GetAttachPointOrigin = self.GetAttachPointOrigin
-		self.GetAttachPointOrigin = GetAttachPointOrigin
-	end
-
 	if Server then
 		local attacker = self
 		local maxPitchDegree =  self.kMaxPitch
@@ -74,6 +74,14 @@ function FlameSentry:OnInitialized()
 			local result     = pitch >= minPitchDegree and pitch <= maxPitchDegree
 			return result
 		end
+	elseif Client then
+		self:InitTrailCinematic(kFlamethrowerEffectType.ThirdPerson)
+        self.trailCinematic:AttachTo(self, TRAIL_ALIGN_X, Vector(0.3, 0, 0), kMuzzleNode)
+	end
+
+	if not self.flamesentry_GetAttachPointOrigin then
+		self.flamesentry_GetAttachPointOrigin = self.GetAttachPointOrigin
+		self.GetAttachPointOrigin = GetAttachPointOrigin
 	end
 
 	--[[ Uncomment to enable damage buff
@@ -117,7 +125,6 @@ if Server then
 	end
 
 	function FlameSentry:FireBullets()
-		---[[
 		if not self.last_attack_effect or Shared.GetTime() - self.last_attack_effect > 1 then
 			self:TriggerEffects "flamethrower_attack_start"
 			self.last_attack_effect = Shared.GetTime()
@@ -125,9 +132,15 @@ if Server then
 			self:TriggerEffects "flamesentry_attack"
 			self.last_attack_effect = Shared.GetTime()
 		end
-		--]]
-		--self:TriggerEffects "flamethrower_attack_start"
 		return self:ShootFlame(self)
+	end
+end
+
+if Client then
+	function FlameSentry:OnUpdateRender()
+		if self.trailCinematic then
+			self.trailCinematic:SetIsVisible(self.attacking)
+		end
 	end
 end
 
@@ -138,8 +151,6 @@ GetEffectManager():AddEffectData(nil, {
 				if v.assetType == "weapon_cinematic" and not v.empty then
 					Log("Found weapon cinematic %s", v.asset)
 					return v.asset
-				else
-					--Log("%s is not valid", v)
 				end
 			end
 			error "Could not find the flamethrower_attack weapon_cinematic for flamesentry_attack!"
@@ -148,4 +159,4 @@ GetEffectManager():AddEffectData(nil, {
 	}}}
 })
 
-Shared.LinkClassToMap("FlameSentry", FlameSentry.kMapName, networkVars)
+Shared.LinkClassToMap("FlameSentry", FlameSentry.kMapName, {})
