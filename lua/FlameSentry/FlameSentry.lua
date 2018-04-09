@@ -24,7 +24,7 @@ local kFlamethrowerEffectType
 if Client then
 	FlameSentry.InitTrailCinematic = assert(Flamethrower.InitTrailCinematic)
 
-	kFlamethrowerEffectType = debug.getupvalue(FlameSentry.InitTrailCinematic, "kEffectType")
+	kFlamethrowerEffectType = debug.getupvaluex(FlameSentry.InitTrailCinematic, "kEffectType")
 end
 
 local kMuzzleNode         = "fxnode_flamesentrymuzzle"
@@ -120,7 +120,7 @@ function FlameSentry:GetMeleeOffset()
 end
 
 if Server then
-	local OnDeploy = debug.getupvalue(FlameSentry.OnConstructionComplete, "OnDeploy")
+	local OnDeploy = debug.getupvaluex(FlameSentry.OnConstructionComplete, "OnDeploy")
 	function FlameSentry:OnConstructionComplete()
 		self:AddTimedCallback(OnDeploy, 1.4)
 	end
