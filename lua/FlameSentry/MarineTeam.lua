@@ -1,6 +1,13 @@
-local old = MarineTeam.InitTechTree
+-- this	is pretty tricky
+local oldInitTechTree =	MarineTeam.InitTechTree
 function MarineTeam:InitTechTree()
-   old(self)
-   self.techTree:AddBuildNode(kTechId.FlameSentry, kTechId.RoboticsFactory, kTechId.None, true)
-   self.techTree:SetComplete()
+	PlayingTeam.InitTechTree(self)
+	self.techTree:AddBuildNode(kTechId.FlameSentry, kTechId.RoboticsFactory, kTechId.None, true)
+
+	-- temporarily disable initializing	the	tech tree
+	local oldPlayingInit = PlayingTeam.InitTechTree
+	PlayingTeam.InitTechTree = function() end
+	oldInitTechTree(self)
+	-- re-enable it	now
+	PlayingTeam.InitTechTree = oldPlayingInit
 end
